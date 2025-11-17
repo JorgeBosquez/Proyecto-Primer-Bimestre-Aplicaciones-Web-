@@ -295,6 +295,11 @@ body {
     animation: slideInUp 0.7s ease-out 0.3s both;
 }
 
+.instructions, .credits span{
+    font-weight: 900;
+
+}
+
 /* UI del Juego */
 #gameScreen {
     display: block;
