@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Arcade Shooter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- Pantalla de Carga -->
+        <div id="loadingScreen" class="screen">
+            <div class="loader">
+                <div class="loader-bar"></div>
+                <div class="loader-text">Cargando...</div>
+            </div>
+        </div>
+
+        <!-- Menú Principal -->
+        <div id="mainMenu" class="screen hidden">
+            <div class="menu-wrapper">
+                <div class="menu-container">
+                    <h1>ARCADE SHOOTER</h1>
+                    <button class="menu-btn" onclick="game.startGame()">JUGAR</button>
+                    <button class="menu-btn" onclick="game.showInstructions()">INSTRUCCIONES</button>
+                    <button class="menu-btn" onclick="game.showCredits()">CRÉDITOS</button>
+                </div>
+                <div class="character-preview">
+                    <canvas id="characterCanvas" width="400" height="300"></canvas>
+                    <div class="preview-label">Personaje Principal</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instrucciones -->
+        <div id="instructionsScreen" class="screen hidden">
+            <div class="menu-container">
+                <h2>INSTRUCCIONES</h2>
+                <div class="instructions">
+                    <p>← → : Moverse</p>
+                    <p>ESPACIO : Saltar</p>
+                    <p>CLICK/ENTER : Atacar</p>
+                    <p>ESC : Pausa</p>
+                </div>
+                <button class="menu-btn" onclick="game.showMainMenu()">VOLVER</button>
+            </div>
+        </div>
+
+        <!-- Créditos -->
+        <div id="creditsScreen" class="screen hidden">
+            <div class="menu-container">
+                <h2>CRÉDITOS</h2>
+                <div class="credits">
+                    <p>Desarrollado con HTML5 Canvas</p>
+                    <p>Música: Gurdonark - Kindergarten</p>
+                    <p>Sprites: OpenGameArt</p>
+                </div>
+                <button class="menu-btn" onclick="game.showMainMenu()">VOLVER</button>
+            </div>
+        </div>
+
+        <!-- Juego -->
+        <div id="gameScreen" class="screen hidden">
+            <canvas id="gameCanvas"></canvas>
+            
+            <!-- UI del Juego -->
+            <div id="gameUI">
+                <div id="scoreContainer" class="ui-box">
+                    <div class="ui-label">PUNTUACIÓN</div>
+                    <div id="score" class="ui-value">0</div>
+                </div>
+                
+                <div id="healthContainer" class="ui-box health-box">
+                    <div class="ui-label">VIDA</div>
+                    <div class="health-bar-container">
+                        <div id="healthBar" class="health-bar"></div>
+                        <span id="healthText" class="health-text">100%</span>
+                    </div>
+                </div>
+                
+                <div id="enemiesContainer" class="ui-box">
+                    <div class="ui-label">ENEMIGOS</div>
+                    <div id="enemies" class="ui-value">0</div>
+                </div>
+                
+                <button id="pauseBtn" class="pause-btn">⏸</button>
+            </div>
+        </div>
+
+        <!-- Pausa -->
+        <div id="pauseScreen" class="screen hidden overlay">
+            <div class="menu-container">
+                <h2>JUEGO EN PAUSA</h2>
+                <button class="menu-btn" onclick="game.togglePause()">CONTINUAR</button>
+                <button class="menu-btn" onclick="game.showMainMenu()">MENÚ PRINCIPAL</button>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="gameOverScreen" class="screen hidden overlay">
+            <div class="menu-container">
+                <h2>GAME OVER</h2>
+                <div id="finalScore">PUNTUACIÓN: 0</div>
+                <button class="menu-btn" onclick="game.restartGame()">REINICIAR</button>
+                <button class="menu-btn" onclick="game.showMainMenu()">MENÚ PRINCIPAL</button>
+            </div>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
