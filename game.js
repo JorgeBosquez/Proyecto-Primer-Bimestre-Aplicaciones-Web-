@@ -107,6 +107,7 @@ class ArcadeShooter {
       direction: "right",
       state: "idle",
       attackCooldown: false,
+      soundPlayed: false,
       currentFrame: 0,
       frameCounter: 0,
 
@@ -167,7 +168,24 @@ class ArcadeShooter {
     this.stars = [];
     this.groundConfig = { height: 100, y: 0 };
 
+    // ========== SISTEMA DE AUDIO ==========
+    this.audio = {
+      menu: null,
+      level1: null,
+      level2: null,
+      currentMusic: null,
+      swordSlash: null,
+    };
+    
+    this.audioConfig = {
+      volume: 0.3,              // Volumen (0.0 a 1.0)
+      startTime: 0,             // Segundo donde empieza (0 = inicio)
+      fadeInDuration: 2000,      // Duración del fade-in en ms
+      sfxVolume: 0.5        // Volumen de efectos de sonido
+    };
+
     this.loadAssets();
+    this.loadAudio();
   }
 
   // ========== SISTEMA DE ESTADOS ==========
@@ -183,19 +201,32 @@ class ArcadeShooter {
       case this.STATES.MAIN_MENU:
         this.showScreen("mainMenu");
         this.initCharacterPreview();
+        this.playMusic('menu'); 
         break;
       case this.STATES.PLAYING:
         this.showScreen("gameScreen");
         this.startGameplay();
         this.startMainLoop();
+
+        // Música según el nivel
+        if (this.currentLevel === 1) {
+          this.playMusic('level1', 31); // Empieza en segundo 0
+        // } else if (this.currentLevel === 2) {
+        //   this.playMusic('level2', 31); // Empieza en segundo 10
+        }
         break;
       case this.STATES.PAUSED:
         this.showScreen("pauseScreen");
         this.stopMainLoop();
+        // Pausar música
+        if (this.audio.currentMusic) {
+          this.audio.currentMusic.pause();
+        }
         break;
       case this.STATES.GAME_OVER:
         this.showScreen("gameOverScreen");
         document.getElementById("finalScore").textContent = `PUNTUACIÓN: ${this.score}`;
+        this.stopMusic(); // ⬅️ Detener música
         break;
       case this.STATES.LEVEL_COMPLETE:
         this.showLevelComplete();
@@ -355,6 +386,109 @@ class ArcadeShooter {
     ctx.fillStyle = "#ff4444";
     ctx.fillRect(0, 0, 128, 128);
     return canvas;
+  }
+
+  // ========== SISTEMA DE AUDIO ==========
+  loadAudio() {
+    // Crear objetos de audio para MÚSICA
+    this.audio.menu = new Audio('assets/audio/i_run.mp3');
+    this.audio.level1 = new Audio('assets/audio/i_run.mp3');
+    this.audio.level2 = new Audio('assets/audio/i_run.mp3');
+    
+    // Crear efectos de sonido
+    this.audio.swordSlash = new Audio('assets/audio/espada.mp3');
+    
+    // Configurar propiedades de MÚSICA (CON loop)
+    [this.audio.menu, this.audio.level1, this.audio.level2].forEach(audio => {
+      if (audio) {
+        audio.volume = this.audioConfig.volume;
+        audio.loop = true; // ⬅️ LOOP solo para música
+        audio.preload = 'auto';
+      }
+    });
+    
+    // Configurar efectos de sonido (SIN loop)
+    if (this.audio.swordSlash) {
+      this.audio.swordSlash.volume = this.audioConfig.sfxVolume;
+      this.audio.swordSlash.loop = false; // ⬅️ NO LOOP para efectos
+      this.audio.swordSlash.preload = 'auto';
+    }
+    
+    console.log('Audio cargado y configurado');
+  }
+
+  playMusic(musicName, startTime = 0) {
+    // Detener música actual si existe
+    if (this.audio.currentMusic) {
+      this.fadeOutMusic(this.audio.currentMusic);
+    }
+    
+    // Obtener la nueva música
+    const newMusic = this.audio[musicName];
+    if (!newMusic) {
+      console.warn(`Música "${musicName}" no encontrada`);
+      return;
+    }
+    
+    // Configurar punto de inicio
+    newMusic.currentTime = startTime; // ⬅️ DESDE QUÉ SEGUNDO EMPIEZA
+    
+    // Fade in (aumentar volumen gradualmente)
+    newMusic.volume = 0;
+    newMusic.play().catch(err => {
+      console.log('Error reproduciendo audio:', err);
+      console.log('Tip: El usuario debe interactuar con la página primero');
+    });
+    
+    this.fadeInMusic(newMusic);
+    this.audio.currentMusic = newMusic;
+  }
+  fadeInMusic(audio) {
+    const targetVolume = this.audioConfig.volume;
+    const duration = this.audioConfig.fadeInDuration;
+    const steps = 50;
+    const stepTime = duration / steps;
+    const volumeIncrement = targetVolume / steps;
+    
+    let currentStep = 0;
+    const fadeInterval = setInterval(() => {
+      currentStep++;
+      audio.volume = Math.min(volumeIncrement * currentStep, targetVolume);
+      
+      if (currentStep >= steps) {
+        clearInterval(fadeInterval);
+      }
+    }, stepTime);
+  }
+  fadeOutMusic(audio) {
+    const duration = 1000; // 1 segundo
+    const steps = 20;
+    const stepTime = duration / steps;
+    const volumeDecrement = audio.volume / steps;
+    
+    let currentStep = 0;
+    const fadeInterval = setInterval(() => {
+      currentStep++;
+      audio.volume = Math.max(audio.volume - volumeDecrement, 0);
+      
+      if (currentStep >= steps) {
+        clearInterval(fadeInterval);
+        audio.pause();
+        audio.currentTime = 0;
+      }
+    }, stepTime);
+  }
+  stopMusic() {
+    if (this.audio.currentMusic) {
+      this.fadeOutMusic(this.audio.currentMusic);
+      this.audio.currentMusic = null;
+    }
+  }
+  setMusicVolume(volume) {
+    this.audioConfig.volume = Math.max(0, Math.min(1, volume));
+    if (this.audio.currentMusic) {
+      this.audio.currentMusic.volume = this.audioConfig.volume;
+    }
   }
 
   // ========== SISTEMA DE PLATAFORMAS ==========
@@ -903,6 +1037,9 @@ checkEnemyPitCollision(enemy) {
       this.player.animations.attacking.frames[this.player.currentFrame];
 
     if (attackFrame === 2) {
+      this.playSoundEffect('swordSlash');
+      this.player.soundPlayed = true;
+      
       for (const enemy of this.enemies) {
         if (enemy.state === "dead") continue;
 
@@ -914,7 +1051,21 @@ checkEnemyPitCollision(enemy) {
           enemy.health -= 25;
         }
       }
+      
     }
+  }
+
+  playSoundEffect(soundName) {
+    const sound = this.audio[soundName];  // 1. Obtiene el audio
+    if (!sound) {                         // 2. Verifica que exista
+      console.warn(`Sonido "${soundName}" no encontrado`);
+      return;
+    }
+    
+    sound.currentTime = 0;                // 3. Reinicia a 0 (permite ataques rápidos)
+    sound.play().catch(err => {           // 4. Reproduce el sonido
+      console.log('Error reproduciendo efecto:', err);
+    });
   }
 
   // ========== MENÚ Y CONTROLES ==========
@@ -988,6 +1139,10 @@ checkEnemyPitCollision(enemy) {
     this.currentState = this.STATES.PLAYING;
     this.showScreen("gameScreen");
     this.startMainLoop();
+    // Reanudar música
+    if (this.audio.currentMusic) {
+      this.audio.currentMusic.play();
+    }
   }
 
   restartGame() {
@@ -1548,6 +1703,7 @@ checkEnemyPitCollision(enemy) {
 
   finishAttack() {
     this.player.attackCooldown = false;
+      this.player.soundPlayed = false; 
     this.player.state = "idle";
   }
 }
