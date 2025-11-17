@@ -51,17 +51,17 @@ class ArcadeShooter {
         ]
       },
       3: {
-        name: "Infierno Ardiente",           // Nombre del nivel
-        backgroundColor: '#4a0000',        // Fondo rojo oscuro
-        cloudAlpha: 0.5,                     // Opacidad nubes
-        enemySpeedMultiplier: 1.8,           // Enemigos 80% más rápidos
-        enemySpawnInterval: 1000,            // Enemigo 1 cada 1 segundo
-        enemy2SpawnInterval: 2000,           // Enemigo 2 cada 2 segundos
-        numPlatforms: 4,                     // 4 plataformas con corazones
-        hasPits: true,                       // Activar precipicios
-        goalX: 4000,                         // Meta más cerca
-        enemyHealthMultiplier: 1.5,          // Enemigos con 50% más vida
-        pits: [                              // Precipicios
+        name: "Infierno Ardiente",           
+        backgroundColor: '#4a0000',        
+        cloudAlpha: 0.5,                     
+        enemySpeedMultiplier: 1.8,           
+        enemySpawnInterval: 1000,            
+        enemy2SpawnInterval: 2000,           
+        numPlatforms: 4,                     
+        hasPits: true,                       
+        goalX: 4000,                         
+        enemyHealthMultiplier: 1.5,          
+        pits: [                              
           { x: 800, width: 500 },
           { x: 2000, width: 400 },
           { x: 3200, width: 600 }
