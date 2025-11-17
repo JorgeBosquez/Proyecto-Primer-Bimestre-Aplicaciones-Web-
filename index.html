@@ -107,6 +107,76 @@
                 <button class="menu-btn" onclick="game.showMainMenu()">MENÚ PRINCIPAL</button>
             </div>
         </div>
+
+        <!-- Siguiente Nivel -->
+        <div id="levelCompleteScreen" class="screen hidden overlay">
+            <div class="level-complete-container">
+                <div class="level-badge">
+                    <div class="badge-glow"></div>
+                    <span class="badge-text">✓</span>
+                </div>
+                <h2 class="level-title">¡NIVEL COMPLETADO!</h2>
+                <div class="level-info">
+                    <div class="level-number" id="levelNumberDisplay">NIVEL 1</div>
+                    <div class="score-display">
+                        <span class="score-label">PUNTUACIÓN</span>
+                        <span class="score-value" id="levelCompleteScore">0</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="menu-btn next-level-btn" onclick="game.nextLevel()">SIGUIENTE NIVEL</button>
+                    <button class="menu-btn main-menu-btn" onclick="game.showMainMenu()">MENÚ PRINCIPAL</button>
+                </div>
+                <div class="decoration-stars">
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                    <span class="star">★</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pantalla de Victoria Final -->
+        <div id="victoryScreen" class="screen hidden overlay">
+            <div class="victory-container">
+                <div class="victory-content">
+                    <div class="victory-badge">
+                        <div class="victory-glow"></div>
+                        <span class="victory-icon">👑</span>
+                    </div>
+                    <h2 class="victory-title">¡FELICIDADES!</h2>
+                    <p class="victory-subtitle">¡COMPLETASTE TODOS LOS NIVELES!</p>
+                    
+                    <div class="achievement-list">
+                        <div class="achievement-item">
+                            <span class="achievement-icon">🌟</span>
+                            <span class="achievement-text">Nivel 1 Completado</span>
+                        </div>
+                        <div class="achievement-item">
+                            <span class="achievement-icon">🌙</span>
+                            <span class="achievement-text">Nivel 2 Completado</span>
+                        </div>
+                        <div class="achievement-item">
+                            <span class="achievement-icon">🔥</span>
+                            <span class="achievement-text">Nivel 3 Completado</span>
+                        </div>
+                    </div>
+                    
+                    <div class="final-stats">
+                        <div class="stat-box">
+                            <span class="stat-label">PUNTUACIÓN FINAL</span>
+                            <span class="stat-value" id="finalVictoryScore">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="victory-buttons">
+                        <button class="menu-btn victory-btn" onclick="game.showMainMenu()">VOLVER AL MENÚ</button>
+                    </div>
+                    
+                    <p class="victory-message">Gracias por jugar • Arcade Shooter</p>
+                </div>
+                <div class="confetti-container" id="confetti"></div>
+            </div>
+        </div>
     </div>
     <script src="game.js"></script>
 </body>

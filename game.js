@@ -11,6 +11,7 @@ class ArcadeShooter {
       PAUSED: "paused",
       GAME_OVER: "game_over",
       LEVEL_COMPLETE: "level_complete",
+      VICTORY: "victory",
       INSTRUCTIONS: "instructions",
       CREDITS: "credits",
     };
@@ -209,32 +210,11 @@ class ArcadeShooter {
   }
 
   showLevelComplete() {
-    const overlay = document.createElement('div');
-    overlay.id = 'levelCompleteOverlay';
-    overlay.className = 'screen overlay';
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.9);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    `;
-    overlay.innerHTML = `
-      <div class="menu-container" style="text-align: center; padding: 40px; background: rgba(20, 20, 40, 0.95); border-radius: 20px; border: 3px solid #FFD700;">
-        <h2 style="color: #FFD700; font-size: 48px; margin-bottom: 20px;">¡NIVEL ${this.currentLevel} COMPLETADO!</h2>
-        <div style="margin: 30px 0; font-size: 28px; color: white;">
-          <p>PUNTUACIÓN: ${this.score}</p>
-        </div>
-        <button class="menu-btn" onclick="game.nextLevel()" style="margin: 10px; padding: 15px 40px; font-size: 20px;">SIGUIENTE NIVEL</button>
-        <button class="menu-btn" onclick="game.showMainMenu()" style="margin: 10px; padding: 15px 40px; font-size: 20px;">MENÚ PRINCIPAL</button>
-      </div>
-    `;
-    document.getElementById('gameContainer').appendChild(overlay);
+    this.hideAllScreens();
+    this.showScreen("levelCompleteScreen");
+    document.getElementById("levelNumberDisplay").textContent = `NIVEL ${this.currentLevel}`;
+    document.getElementById("levelCompleteScore").textContent = `${Math.floor(this.score)}`;
+    this.stopMainLoop();
   }
 
   // Inicia el bucle principal solo si no hay uno en marcha
@@ -254,9 +234,6 @@ class ArcadeShooter {
   hideAllScreens() {
     const screens = document.querySelectorAll(".screen");
     screens.forEach((screen) => screen.classList.add("hidden"));
-    
-    const levelComplete = document.getElementById('levelCompleteOverlay');
-    if (levelComplete) levelComplete.remove();
   }
 
   showScreen(screenId) {
@@ -388,17 +365,46 @@ class ArcadeShooter {
 
     const levelConfig = this.levels[this.currentLevel];
 
-    const allPlatforms = [
-      { x: 500, y: 400, width: 200, height: 20 },
-      { x: 1000, y: 250, width: 150, height: 20 },
-      { x: 1500, y: 400, width: 180, height: 20 },
-      { x: 2200, y: 320, width: 220, height: 20 },
-      { x: 3000, y: 280, width: 170, height: 20 },
-      { x: 3800, y: 350, width: 190, height: 20 },
-    ];
+    let selectedPlatforms = [];
 
-    // Seleccionar plataformas según el nivel
-    const selectedPlatforms = allPlatforms.slice(0, levelConfig.numPlatforms);
+    // Plataformas específicas por nivel
+    if (this.currentLevel === 1) {
+      selectedPlatforms = [
+        { x: 500, y: 400, width: 200, height: 20 },
+        { x: 1000, y: 250, width: 150, height: 20 },
+        { x: 1500, y: 400, width: 180, height: 20 },
+        { x: 2200, y: 320, width: 220, height: 20 },
+        { x: 3000, y: 280, width: 170, height: 20 },
+        { x: 3800, y: 350, width: 190, height: 20 },
+      ];
+    } else if (this.currentLevel === 2) {
+      // Nivel 2: Noche Peligrosa - con precipicios
+      selectedPlatforms = [
+        { x: 500, y: 400, width: 200, height: 20 },
+        { x: 1000, y: 250, width: 150, height: 20 },
+        { x: 1500, y: 400, width: 180, height: 20 },
+        // Después del primer precipicio (1200-1600)
+        { x: 1800, y: 300, width: 160, height: 20 },
+        { x: 2200, y: 350, width: 200, height: 20 },
+        // Después del segundo precipicio (2600-2950)
+        { x: 3200, y: 280, width: 170, height: 20 },
+        { x: 3600, y: 380, width: 190, height: 20 },
+      ];
+    } else if (this.currentLevel === 3) {
+      // Nivel 3: Infierno Ardiente - más desafiante
+      selectedPlatforms = [
+        { x: 500, y: 380, width: 180, height: 20 },
+        { x: 1000, y: 280, width: 160, height: 20 },
+        // Después del primer precipicio (800-1300)
+        { x: 1500, y: 350, width: 190, height: 20 },
+        { x: 1900, y: 300, width: 170, height: 20 },
+        // Después del segundo precipicio (2000-2400)
+        { x: 2600, y: 330, width: 200, height: 20 },
+        { x: 3000, y: 280, width: 160, height: 20 },
+        // Después del tercer precipicio (3200-3800)
+        { x: 3950, y: 350, width: 150, height: 20 },
+      ];
+    }
 
     selectedPlatforms.forEach((platform) => {
       this.platforms.push(platform);
@@ -411,6 +417,41 @@ class ArcadeShooter {
         collected: false,
       });
     });
+
+    // Agregar plataforma final al nivel del piso para cada nivel
+    if (this.currentLevel === 2) {
+      // Plataforma sólida hasta la meta en nivel 2
+      const finalPlatform = { 
+        x: 4200, 
+        y: this.groundConfig.y - 20, 
+        width: 600, 
+        height: 20 
+      };
+      this.platforms.push(finalPlatform);
+      this.hearts.push({
+        x: finalPlatform.x + finalPlatform.width / 2 - 25,
+        y: finalPlatform.y - 50,
+        width: 50,
+        height: 50,
+        collected: false,
+      });
+    } else if (this.currentLevel === 3) {
+      // Plataforma sólida hasta la meta en nivel 3
+      const finalPlatform = { 
+        x: 4050, 
+        y: this.groundConfig.y - 20, 
+        width: 400, 
+        height: 20 
+      };
+      this.platforms.push(finalPlatform);
+      this.hearts.push({
+        x: finalPlatform.x + finalPlatform.width / 2 - 25,
+        y: finalPlatform.y - 50,
+        width: 50,
+        height: 50,
+        collected: false,
+      });
+    }
   }
 
   generatePits() {
@@ -889,10 +930,36 @@ checkEnemyPitCollision(enemy) {
   nextLevel() {
     this.currentLevel++;
     if (this.currentLevel > 3) {
-      alert('¡Felicidades! Completaste todos los niveles');
-      this.showMainMenu();
+      this.showVictory();
     } else {
       this.setState(this.STATES.PLAYING);
+    }
+  }
+
+  showVictory() {
+    this.hideAllScreens();
+    this.showScreen("victoryScreen");
+    document.getElementById("finalVictoryScore").textContent = `${Math.floor(this.score)}`;
+    this.stopMainLoop();
+    
+    // Crear confetti
+    this.createConfetti();
+  }
+
+  createConfetti() {
+    const confettiContainer = document.getElementById('confetti');
+    const colors = ['#FFD700', '#FFA500', '#FF6B35', '#00ff00', '#ff69b4', '#00bfff'];
+    
+    for (let i = 0; i < 50; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + '%';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = Math.random() * 0.5 + 's';
+      confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+      confetti.style.width = Math.random() * 10 + 5 + 'px';
+      confetti.style.height = confetti.style.width;
+      confettiContainer.appendChild(confetti);
     }
   }
 
